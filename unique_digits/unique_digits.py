@@ -56,9 +56,10 @@ def run_exponential(exp,upper_bound = 10000):
     """
     candidates_result = []
     candidates_base = []
+
     for i in range(0,upper_bound):
         num = i ** exp
-
+        
         compound = str(i) + str(exp)
         separate_compound = separate_digits(compound)
         separate_num = separate_digits(num)
