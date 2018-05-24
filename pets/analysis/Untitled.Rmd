@@ -14,6 +14,8 @@ library(stringr)
 library(ggplot2)
 library(ggmap)
 library(sf)
+library(tidycensus)
+
 ```
 
 ```{r}
@@ -29,5 +31,33 @@ df1 <- df %>%
   mutate(address = str_replace(Found_Location, "\\sin\\s", ", ")) %>%
   mutate(address = str_replace(address, "\\s\\(", ", ")) %>% 
   mutate(address = str_remove(address, "\\)"))
+
+# find only dogs
+dogs <- df1 %>%
+  filter(Animal_Type_intake == 'Dog')
+
+# randomly take rows since the googs only allows me to run geocode 2500 times
+# dogs <- dogs[sample(nrow(dogs), 2200), ]
+```
+
+```{r}
+# borrow function found:
+# https://stackoverflow.com/questions/32504880/street-address-to-geolocation-lat-long
+get_geocode <- function(address) {
+  url = "http://maps.google.com/maps/api/geocode/json?address="
+  url = URLencode(paste(url, address, "&sensor=false", sep = ""))
+  x = RJSONIO::fromJSON(url, simplify = FALSE)
+  if (x$status == "OK") {
+    out = c(x$results[[1]]$geometry$location$lng,
+             x$results[[1]]$geometry$location$lat)
+  } else {
+    out = NA
+  }
+  Sys.sleep(0.2)  # API only allows 5 requests per second
+  out
+}
+
+# find geocodes
+result <- sapply(dogs$address, get_geocode)
 ```
 
