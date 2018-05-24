@@ -1,0 +1,33 @@
+---
+title: "Untitled"
+author: "James Bain"
+date: "5/23/2018"
+output: html_document
+---
+
+```{r, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(ggmap)
+library(sf)
+```
+
+```{r}
+df <- read_csv("../rawdata/all_records.csv")
+head(df, 10)
+```
+## Data Preprocessing
+
+Creating an address column
+```{r}
+df1 <- df %>%
+  filter(str_detect(Found_Location, "\\sin\\s")) %>%
+  mutate(address = str_replace(Found_Location, "\\sin\\s", ", ")) %>%
+  mutate(address = str_replace(address, "\\s\\(", ", ")) %>% 
+  mutate(address = str_remove(address, "\\)"))
+```
+
