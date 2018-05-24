@@ -15,7 +15,7 @@ library(ggplot2)
 library(ggmap)
 library(sf)
 library(tidycensus)
-
+library(haterzmapper)
 ```
 
 ```{r}
@@ -45,7 +45,7 @@ dogs <- df1 %>%
 
 Here's the the function borrowing that I was talking about. Shout out to `christoph` on StackOverflow for making this all possible [here](https://stackoverflow.com/questions/32504880/street-address-to-geolocation-lat-long). Bravo! 
 
-```{r}
+```{r, eval=FALSE}
 # borrow function found:
 # https://stackoverflow.com/questions/32504880/street-address-to-geolocation-lat-long
 get_geocode <- function(address) {
@@ -66,3 +66,15 @@ get_geocode <- function(address) {
 result <- sapply(dogs$address, get_geocode)
 ```
 
+
+## Gathering the map data
+
+There are a number of ways to collect shapefiles for mapping but I've been really impressed by the ease of use of `tidycensus`. Checkout my first two posts for evidence. It makes collecting Census and American Community Survey data extreeeeeeemely simple and it provides the option to provide the simple feature as well, which makes becoming a cartographer seem like rather reasonable career shift. But I don't want all of Texas, I just need Austin and the surrounding areas. Let's just say a 70 kilometer radius around the center coordinates of the city will do the trick. Well, I wrote a small package the extends the functionality of `sf` and allows me to simply subset a `simple feature` data frame to only those rows that are within a certain distance of some given coordinates.
+```{r}
+# collect all cencus tracts for texas
+tx <- get_acs(geography = "tract", variables = "B00001_001",
+              state = "TX", geometry = TRUE)
+
+# subset for only 70km radius around austin
+austin <- subset_map(tx, long = 97.7431 , lat = 30.2672, dist = 70000)
+```
