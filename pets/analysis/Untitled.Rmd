@@ -24,7 +24,13 @@ head(df, 10)
 ```
 ## Data Preprocessing
 
-Creating an address column
+The first round of preprocessing is rather straight forward but we can discuss my motivation anyhow. Dogs are just the best. I've known nothing truer in my entire life. Geospatial analysis is also among my favorites (because MAPS). The rest was simple, I wanted to perform a visual geospatial analysis on dog data. BOOM! Here we are. 
+
+These data contain addresses, which is a great start but it would be better if I had access to coordinates. Whoops! That wasn't simple. Since I'm not a `ggmap` savant, my development process of using `geocode` ended rather abruptly when I attempted to many requests. Disappointing? Yes. Did it stop me? Almost. But alas, I trudged forward and found that where Google had let me down in one respect, it lifted me back up in another. I googled for my next solution and *SPOILER ALERT* someone had written a rather nice fuction for pulling geocode data from the api. Long story short, I borrowed it.
+
+Before I had all of that fun, I need to clean up the address that I had at my disposal. The first step was to take those that had specific addresses. Many had just a city reference, which is a total bummer. For those that did have an address they weren't quite in a state that would be acceptable for our knockoff `geocode` function. So I clean up this column so that we just had addresses and those address were in the standard addressy format: <unit number> <street>, <city>, <state abbreviation>.
+
+Next step was to filter on dogs. In hindsight, I should have done this first but I didn't. You win some. You lose some. Also, no offense to cat people out there. I like 'em... but... dogs. 
 ```{r}
 df1 <- df %>%
   filter(str_detect(Found_Location, "\\sin\\s")) %>%
@@ -35,10 +41,9 @@ df1 <- df %>%
 # find only dogs
 dogs <- df1 %>%
   filter(Animal_Type_intake == 'Dog')
-
-# randomly take rows since the googs only allows me to run geocode 2500 times
-# dogs <- dogs[sample(nrow(dogs), 2200), ]
 ```
+
+Here's the the function borrowing that I was talking about. Shout out to `christoph` on StackOverflow for making this all possible [here](https://stackoverflow.com/questions/32504880/street-address-to-geolocation-lat-long). Bravo! 
 
 ```{r}
 # borrow function found:
