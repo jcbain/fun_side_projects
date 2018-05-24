@@ -63,9 +63,31 @@ get_geocode <- function(address) {
 }
 
 # find geocodes
-result <- sapply(dogs$address, get_geocode)
+result3 <- sapply(dogs$address[7001:20000], get_geocode)
+```
+```{r, eval=FALSE}
+load('~/Dropbox/dog_coords.rda')
+load('~/Dropbox/dog_coords2.rda')
 ```
 
+```{r}
+coord_names <- c("lon", "lat")
+coords <- data.frame(t(as.data.frame(result)))
+names(coords) <- coord_names
+coords2 <- data.frame(t(as.data.frame(result2)))
+names(coords2) <- coord_names
+
+dogs1 <- cbind(dogs[1:1890,],coords[1:1890,])
+dogs2 <- cbind(dogs[1891:7000,], coords2)
+
+dogs <- rbind(dogs1, dogs2)
+dogs <- dogs[complete.cases(dogs$lat),]
+```
+
+```{r}
+dogs_sf <- st_as_sf(dogs, coords = c("lon", "lat"), crs = 4326)
+dogs_sf <- subset_map(dogs_sf, long = -97.7431 , lat = 30.2672, dist = 70000)
+```
 
 ## Gathering the map data
 
@@ -76,5 +98,12 @@ tx <- get_acs(geography = "tract", variables = "B00001_001",
               state = "TX", geometry = TRUE)
 
 # subset for only 70km radius around austin
-austin <- subset_map(tx, long = 97.7431 , lat = 30.2672, dist = 70000)
+austin <- subset_map(tx, long = -97.7431 , lat = 30.2672, dist = 70000)
+austin <- austin %>% st_transform(crs = 4326)
+```
+
+```{r}
+ggplot() + 
+  geom_sf(data = austin, colour = 'grey', fill = 'grey', alpha = 0) +
+  geom_sf(data = dogs_sf, colour = 'black', alpha = .5) 
 ```
