@@ -123,8 +123,11 @@ ggplot() +
   geom_sf(data = dogs_sf, colour = '#ef1cff', alpha = .2) +
   map_theme_space() +
   ggtitle("Adoptable Dogs", subtitle = "Austin, Texas")
+
+# ggsave("../figures/doggo_coords.png", dpi = "retina", height = 10, width = 10)
 ```
 
+![](../figures/doggo_coords.png)
 
 ```{r, fig.height=10, fig.width=10}
 intersection <- st_intersection(dogs_sf, austin) 
@@ -144,7 +147,11 @@ ggplot() +
   scale_fill_viridis() +
   scale_fill_viridis() +
   ggtitle("Number of Adoptable Dogs by Census Tract")
+
+# ggsave("../figures/doggo_nums.png", dpi = "retina", height = 10, width = 10)
 ```
+
+![](../figures/doggo_nums.png)
 
 ```{r, fig.height=10, fig.width=10}
 dog_count %>% 
@@ -155,4 +162,8 @@ dog_count %>%
   scale_fill_viridis() + 
   scale_color_viridis() + 
   ggtitle("Proportion of Dogs to Population of Each Census Tract")
+
+# ggsave("../figures/doggo_props.png", dpi = "retina", height = 10, width = 10)
 ```
+
+![](../figures/doggo_props.png)
