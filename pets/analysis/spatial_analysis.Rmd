@@ -9,7 +9,7 @@ Dogs are a central part of my life. I have a friend from Germany who likes to th
 
 ...
 
-I got motivated to attempt a side project this week
+I got motivated to attempt a side project this week. Recently these have been hard for me to come by as I've been rather preoccupied with writing my disseration, but I did come across a Tweet this week [original tweet here](https://twitter.com/jhnmxwll/status/999347713165570048) in which the company Rover.com has created an internal `R` package for their analyses. That got me to thinking, if a quarter of my "life pie" is constantly being consumed by dogs then I must like them enough. Why haven't a tried an analysis. Well, this is that and here we are...an analysis of adoptable dogs.
 
 ```{r, warning=FALSE}
 library(dplyr)
@@ -25,6 +25,7 @@ library(haterzmapper)
 library(viridis)
 ```
 
+So I sought out data on dogs. I stumbled upon a couple but this one opened my eyelids. I saw addresses and I knew that I could do a spatial analysis (about 1/7th of my life-pie right now). The data is about shelter dogs and cats and where they are found and was posted by Rachel Downs and can be found here [here](https://data.world/rdowns26/austin-animal-shelter). Thanks, Rachel.
 
 ```{r}
 df <- read_csv("../rawdata/all_records.csv")
