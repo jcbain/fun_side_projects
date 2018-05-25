@@ -1,9 +1,15 @@
 ---
-title: "Untitled"
+title: "Where Do All Those Doggos Come From?"
 author: "James Bain"
 date: "5/23/2018"
 output: html_document
 ---
+
+Dogs are a central part of my life. I have a friend from Germany who likes to think of his life as "Life Pie", or the idea that our life is a pie and certain slices are eaten up by certain activities. The more time consuming the activity, the bigger the life pie slice. Well, I'd say dogs take up about a quarter of my "life pie". Take that tidbit as you will. 
+
+...
+
+I got motivated to attempt a side project this week
 
 ```{r, warning=FALSE}
 library(dplyr)
@@ -18,6 +24,7 @@ library(tidycensus)
 library(haterzmapper)
 library(viridis)
 ```
+
 
 ```{r}
 df <- read_csv("../rawdata/all_records.csv")
