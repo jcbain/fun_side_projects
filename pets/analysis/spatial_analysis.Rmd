@@ -145,7 +145,7 @@ ggplot() +
   geom_sf(data = dog_count, aes(fill = n,  colour = n)) +
   map_theme_space() + 
   scale_fill_viridis() +
-  scale_fill_viridis() +
+  scale_color_viridis() +
   ggtitle("Number of Adoptable Dogs by Census Tract")
 
 # ggsave("../figures/doggo_nums.png", dpi = "retina", height = 10, width = 10)
