@@ -90,7 +90,7 @@ names(coords2) <- coord_names
 dogs1 <- cbind(dogs[1:1890,],coords[1:1890,])
 dogs2 <- cbind(dogs[1891:7000,], coords2)
 
-dogs <- rbind(dogs1, dogs2)
+dogs <- rbind(dogs1, dogs2[,1:41])
 dogs <- dogs[complete.cases(dogs$lat),]
 ```
 
@@ -118,10 +118,10 @@ dogs_sf <- dogs_sf %>% st_transform(crs = 4326)
 
 ```{r, fig.height=10, fig.width=10}
 ggplot() + 
-  geom_sf(data = outer, colour = '#92e5b5', fill = "#00ffa9", alpha = 0) +
-  geom_sf(data = austin, colour = '#92e5b5', fill = "#00ffa9", alpha = .4) +
-  geom_sf(data = dogs_sf, colour = '#ef1cff', alpha = .2) +
-  map_theme_space() +
+  geom_sf(data = outer, colour = '#b4b59f', fill = "#cdceb5", alpha = 0) +
+  geom_sf(data = austin, colour = '#b4b59f', fill = "#cdceb5", alpha = .8) +
+  geom_sf(data = dogs_sf, colour = '#827281', alpha = .2) +
+  map_theme_stark() +
   ggtitle("Adoptable Dogs", subtitle = "Austin, Texas")
 
 # ggsave("../figures/doggo_coords.png", dpi = "retina", height = 10, width = 10)
