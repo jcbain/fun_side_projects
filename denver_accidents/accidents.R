@@ -18,6 +18,10 @@ library(haterzmapper)
 # hud data
 # https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-hud-income-levels
 
+# road data
+# https://catalog.data.gov/dataset/tiger-line-shapefile-2012-county-denver-county-co-all-roads-county-based-shapefile
+# https://www.census.gov/geo/reference/rttyp.html
+
 
 accid <- st_read("~/Documents/side_projects/denver_accidents/data/accidents/traffic_accidents.shp")
 nhoods <- st_read("~/Documents/side_projects/denver_accidents/data/neighborhoods/statistical_neighborhoods.shp")
