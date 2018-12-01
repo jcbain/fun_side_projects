@@ -47,7 +47,7 @@ accid %>%
   scale_fill_gradient2(low = '#fde0dd', mid = '#fa9fb5', high = '#c51b8a', midpoint = 1)
 
 
-accid %>% 
+nohwy <- accid %>% 
   st_set_geometry(NULL) %>% 
   group_by(NEIGHBORHO) %>% 
   tally() %>%
@@ -72,6 +72,32 @@ accid %>%
     state_length = 3
   ) 
 
+hwyplot <- accid %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(NEIGHBORHO) %>% 
+  tally() %>%
+  left_join(select(dem2010, NBRHD_NAME, POPULATION_2010, HISPANIC_2010, 
+                   WHITE_2010, BLACK_2010, NATIVEAM_2010, ASIAN_2010, 
+                   HAWPACIS_2010, OTHER_2010), by = c('NEIGHBORHO' = 'NBRHD_NAME')) %>%
+  mutate_at(vars(HISPANIC_2010:OTHER_2010), funs(./POPULATION_2010)) %>%
+  rename(Hispanic = HISPANIC_2010, white = WHITE_2010, black = BLACK_2010, 
+         `Native American` = NATIVEAM_2010, Asian = ASIAN_2010, 
+         `Hawaiian/Pacific Islander` = HAWPACIS_2010, Other = OTHER_2010) %>% 
+  gather(race_ethnicity, val, -c(NEIGHBORHO,POPULATION_2010, n)) %>% 
+  left_join(nhoods, by = c('NEIGHBORHO' = 'NBHD_NAME')) %>% 
+  ggplot() +
+  geom_sf(aes(fill = val), color = 'grey', size = .1) + 
+  geom_sf(data = filter(roads, RTTYP == "I"), color = "#dde023", size = .9, alpha = .8) +
+  geom_sf(data = filter(roads, RTTYP == "U"), color = "#c6c924", size = .5, alpha = .8) +
+  scale_fill_gradient(low = '#e5f5f9', high = '#2ca25f') +
+  #scale_color_gradient2(low = '#fde0dd', mid = '#fa9fb5', high = '#c51b8a', midpoint = .5) +
+  map_theme_soft() + 
+  labs(title = "Race/Ethnicity: {closest_state}") +
+  transition_states(
+    race_ethnicity, 
+    transition_length = 2,
+    state_length = 3
+  ) 
 
 
 
