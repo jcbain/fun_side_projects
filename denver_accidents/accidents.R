@@ -130,3 +130,37 @@ ggplot() +
   theme_bw() +
   scale_x_continuous(labels = scales::percent) +
   labs(x = 'percentage of low-income households')
+
+touches <- st_touches(st_as_sf(hud_noroad), st_as_sf(hud_road), sparse = F)
+touches_bool <- apply(X = touches, MARGIN = 1, FUN = function(x){any(x == TRUE)})
+hud_touches <- hud_noroad[touches_bool,]
+
+mean_hud_touches <- hud_touches %$% mean(low_perc, na.rm = T)
+
+ggplot() +
+  geom_sf(data = st_as_sf(hud), fill = 'grey', color = 'grey', size = .2, alpha = .2) +
+  geom_sf(data = st_as_sf(hud_road), fill = '#c6c924', color = 'grey', size = .2, alpha = .7) +
+  geom_sf(data = st_as_sf(hud_touches), fill = '#2ca25f', color = 'grey', size = .2, alpha = .7) +
+  geom_sf(data = filter(roads, RTTYP == "I"), color = "#ffab84", size = .9, alpha = .8) +
+  geom_sf(data = filter(roads, RTTYP == "U"), color = "#ffab84", size = .5, alpha = .8) +
+  map_theme_soft()
+
+
+ggplot() +
+  geom_density(data = hud_noroad, aes(x = low_perc), color = '#2ca25f', fill = '#2ca25f', alpha = .3) +
+  geom_vline(data = hud_noroad, xintercept = mean_hud_noroad, color = '#2ca25f') +
+  geom_density(data = hud_road, aes(x = low_perc), color = '#c6c924', fill = '#c6c924', alpha = .3) +
+  geom_vline(data = hud_road, xintercept = mean_hud_road, color = '#c6c924') +
+  geom_density(data = hud_touches, aes(x = low_perc), color = "#ffab84", fill = "#ffab84", alpha = .3) +
+  geom_vline(data = hud_touches, xintercept = mean_hud_touches, color = "#ffab84") +
+  theme_bw() +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = 'percentage of low-income households')
+
+ggplot(rbind(mutate(hud_road, cat = 'road'), mutate(hud_noroad, cat = 'no road'), mutate(hud_touches, cat = 'touches'))) +
+  geom_boxplot(aes(x = cat, y = low_perc, color = cat )) + 
+  theme_bw() + 
+  scale_color_manual(values = c('#2ca25f', "#ffab84", '#c6c924')) +
+  theme(legend.title = element_blank(), 
+        axis.title.x = element_blank()) +
+  labs(y = 'percentage of low-income households')
