@@ -3,6 +3,7 @@ library(ggplot2)
 library(readr)
 library(tidyr)
 library(dplyr)
+library(magrittr)
 library(gganimate)
 library(transformr)
 library(haterzmapper)
@@ -72,6 +73,7 @@ nohwy <- accid %>%
     state_length = 3
   ) 
 
+# race/ethnicity plot
 hwyplot <- accid %>% 
   st_set_geometry(NULL) %>% 
   group_by(NEIGHBORHO) %>% 
@@ -99,11 +101,32 @@ hwyplot <- accid %>%
     state_length = 3
   ) 
 
+hud %>%
+  mutate(low_perc = LOW/LOWMODUNIV) %>%
+  ggplot() +
+  geom_sf(aes(fill = low_perc), color = 'grey', size = .01) +
+  geom_sf(data = filter(roads, RTTYP == "I"), color = "#dde023", size = .9, alpha = .8) +
+  geom_sf(data = filter(roads, RTTYP == "U"), color = "#c6c924", size = .5, alpha = .8) +
+  scale_fill_gradient(low = '#e5f5f9', high = '#2ca25f') +
+  map_theme_soft()
 
 
-# accidents %>% filter(FIRST_OCCU == "2012-11-02" | FIRST_OCCU == "2012-11-03")  %>% ggplot() +
-#   geom_sf() +   transition_states(
-#     FIRST_OCCU,
-#     transition_length = 2,
-#     state_length = 1
-#   )
+hwy_intersections <- st_intersects(hud, st_transform(filter(roads, RTTYP == "I" | RTTYP == "U"), crs = 4326), sparse = F)
+
+hwy_inter_bool <- apply(X = hwy_intersections, MARGIN = 1, FUN = function(x){any(x == TRUE)})
+
+hud_nongeo <- st_set_geometry(hud, NULL)
+hud_road <- hud_nongeo[hwy_inter_bool,] %>% left_join(hud) %>% mutate(low_perc = LOW/LOWMODUNIV)
+hud_noroad <- hud_nongeo[!hwy_inter_bool,] %>% left_join(hud) %>% mutate(low_perc = LOW/LOWMODUNIV)
+
+mean_hud_road <- hud_road %$% mean(low_perc, na.rm = T)
+mean_hud_noroad <- hud_noroad  %$% mean(low_perc, na.rm = T)
+
+ggplot() +
+  geom_density(data = hud_noroad, aes(x = low_perc), color = '#2ca25f', fill = '#2ca25f', alpha = .6) +
+  geom_vline(data = hud_noroad, xintercept = mean_hud_noroad, color = '#2ca25f') +
+  geom_density(data = hud_road, aes(x = low_perc), color = '#c6c924', fill = '#c6c924', alpha = .6) +
+  geom_vline(data = hud_road, xintercept = mean_hud_road, color = '#c6c924') +
+  theme_bw() +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = 'percentage of low-income households')
