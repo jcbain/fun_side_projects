@@ -164,3 +164,50 @@ ggplot(rbind(mutate(hud_road, cat = 'road'), mutate(hud_noroad, cat = 'no road')
   theme(legend.title = element_blank(), 
         axis.title.x = element_blank()) +
   labs(y = 'percentage of low-income households')
+
+# visualize the most prominent race/ethnicity per neighborhood
+select(dem2010, NBRHD_NAME, POPULATION_2010, HISPANIC_2010, 
+       WHITE_2010, BLACK_2010, NATIVEAM_2010, ASIAN_2010, 
+       HAWPACIS_2010, OTHER_2010) %>%
+  gather(race_ethnicity, val, -c(POPULATION_2010, NBRHD_NAME)) %>%
+  group_by(NBRHD_NAME) %>%
+  filter(val == max(val)) %>% View()
+
+# race/ethnicity analysis
+# -----------------------
+hud_props <-hud %>% st_intersection(nhoods) %>% st_set_geometry(NULL) %>%
+  mutate(low_perc = LOW/LOWMODUNIV) %>%
+  group_by(NBHD_NAME) %>%
+  summarize(mean_low = mean(low_perc, na.rm = T)) %>% 
+  left_join(select(dem2010, NBRHD_NAME, POPULATION_2010, HISPANIC_2010, 
+                   WHITE_2010, BLACK_2010, NATIVEAM_2010, ASIAN_2010, 
+                   HAWPACIS_2010, OTHER_2010) %>%
+              gather(race_ethnicity, val, -c(POPULATION_2010, NBRHD_NAME)), by = c('NBHD_NAME' = 'NBRHD_NAME')) 
+
+
+mod_dat_h <- hud_props %>%
+  group_by(NBHD_NAME) %>%
+  filter(val == max(val)) %>%
+  mutate(prop = val/POPULATION_2010) %>% 
+  filter(race_ethnicity == 'HISPANIC_2010') 
+
+mod_dat_w <- hud_props %>%
+  group_by(NBHD_NAME) %>%
+  filter(val == max(val)) %>%
+  mutate(prop = val/POPULATION_2010) %>% 
+  filter(race_ethnicity == 'WHITE_2010') 
+
+h_mod <- lm(mean_low ~ prop, data = mod_dat_h)
+w_mod <- lm(mean_low ~ prop, data = mod_dat_w)
+
+# visualize the relationship between low-income housing and proportion of a race
+hud_props %>%
+  group_by(NBHD_NAME) %>%
+  filter(val == max(val)) %>%
+  mutate(prop = val/POPULATION_2010) %>%
+  ggplot(aes(x = prop, y = mean_low, color = race_ethnicity)) + 
+  geom_point() + 
+  geom_abline(intercept = coef(h_mod)[1], slope = coef(h_mod)[2], color = '#2ca25f') + 
+  geom_abline(intercept = coef(w_mod)[1], slope = coef(w_mod)[2], color = '#ffab84') + 
+  theme_bw() +
+  scale_color_manual(values = c('#c6c924', '#2ca25f', "#ffab84"))
