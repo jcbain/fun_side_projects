@@ -165,13 +165,17 @@ ggplot() +
   scale_x_continuous(labels = scales::percent) +
   labs(x = 'percentage of low-income households')
 
+# boxplot
 ggplot(rbind(mutate(hud_road, cat = 'road'), mutate(hud_noroad, cat = 'no road'), mutate(hud_touches, cat = 'touches'))) +
   geom_boxplot(aes(x = cat, y = low_perc, color = cat )) + 
   theme_bw() + 
   scale_color_manual(values = c('#2ca25f', "#ffab84", '#c6c924')) +
   theme(legend.title = element_blank(), 
         axis.title.x = element_blank()) +
-  labs(y = 'percentage of low-income households')
+  ggtitle(label = 'Proportion of Low-Income Households') +
+  theme(text=element_text(family="Montserrat"), 
+        legend.position = "none",
+        axis.title.y = element_blank()) 
 
 # visualize the most prominent race/ethnicity per neighborhood
 select(dem2010, NBRHD_NAME, POPULATION_2010, HISPANIC_2010, 
