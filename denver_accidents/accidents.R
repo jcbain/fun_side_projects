@@ -8,7 +8,9 @@ library(magrittr)
 library(gganimate)
 library(transformr)
 library(haterzmapper)
+library(extrafont)
 
+font_import(paths = "~/Library/Fonts/skyfonts-google/")
 # traffic accident data
 # https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-traffic-accidents
 
@@ -25,6 +27,8 @@ library(haterzmapper)
 # https://catalog.data.gov/dataset/tiger-line-shapefile-2012-county-denver-county-co-all-roads-county-based-shapefile
 # https://www.census.gov/geo/reference/rttyp.html
 
+
+# load data
 
 accid <- st_read("~/Documents/side_projects/denver_accidents/data/accidents/traffic_accidents.shp")
 nhoods <- st_read("~/Documents/side_projects/denver_accidents/data/neighborhoods/statistical_neighborhoods.shp")
@@ -226,7 +230,10 @@ tibble(
   geom_density(aes(x = x, y = Posterior_1), stat = 'identity', color = '#2ca25f', fill = '#2ca25f', alpha = .5) +
   geom_density(aes(x = x, y = Posterior_2), stat = 'identity', color = '#ffab84', fill = '#ffab84', alpha = .5) +
   geom_hline(yintercept = 0) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "Posterior Slope Probabilities", y = "Density") +
+  theme(text=element_text(family="Montserrat"))
+  
 
 
 h_mod <- lm(mean_low ~ prop, data = mod_dat_h)
@@ -242,4 +249,4 @@ hud_props %>%
   geom_abline(intercept = coef(h_mod)[1], slope = coef(h_mod)[2], color = '#2ca25f') + 
   geom_abline(intercept = coef(w_mod)[1], slope = coef(w_mod)[2], color = '#ffab84') + 
   theme_bw() +
-  scale_color_manual(values = c('#c6c924', '#2ca25f', "#ffab84"))
+  scale_color_manual(values = c('#c6c924', '#2ca25f', "#ffab84")) 
