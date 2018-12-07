@@ -99,6 +99,7 @@ hwyplot <- accid %>%
   scale_fill_gradient(low = '#e5f5f9', high = '#2ca25f') +
   #scale_color_gradient2(low = '#fde0dd', mid = '#fa9fb5', high = '#c51b8a', midpoint = .5) +
   map_theme_soft() + 
+  theme(text=element_text(family="Montserrat")) +
   labs(title = "Race/Ethnicity: {closest_state}") +
   transition_states(
     race_ethnicity, 
@@ -148,9 +149,11 @@ ggplot() +
   geom_sf(data = st_as_sf(hud_touches), fill = '#2ca25f', color = 'grey', size = .2, alpha = .7) +
   geom_sf(data = filter(roads, RTTYP == "I"), color = "#ffab84", size = .9, alpha = .8) +
   geom_sf(data = filter(roads, RTTYP == "U"), color = "#ffab84", size = .5, alpha = .8) +
-  map_theme_soft()
+  map_theme_soft() +
+  ggtitle(label = "Census Tracts that Touch Highways") +
+  theme(text=element_text(family="Montserrat")) 
 
-
+# highway plot that touches census tracts
 ggplot() +
   geom_density(data = hud_noroad, aes(x = low_perc), color = '#2ca25f', fill = '#2ca25f', alpha = .3) +
   geom_vline(data = hud_noroad, xintercept = mean_hud_noroad, color = '#2ca25f') +
