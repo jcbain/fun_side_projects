@@ -3,6 +3,7 @@ library(ggplot2)
 library(readr)
 library(tidyr)
 library(dplyr)
+library(brms)
 library(magrittr)
 library(gganimate)
 library(transformr)
@@ -196,6 +197,37 @@ mod_dat_w <- hud_props %>%
   filter(val == max(val)) %>%
   mutate(prop = val/POPULATION_2010) %>% 
   filter(race_ethnicity == 'WHITE_2010') 
+
+mod_dat <- hud_props %>%
+  group_by(NBHD_NAME) %>%
+  filter(val == max(val)) %>%
+  mutate(prop = val/POPULATION_2010) %>%
+  filter(race_ethnicity != 'BLACK_2010')
+
+
+
+mw <- brm(data = mod_dat_w, family = gaussian, 
+    mean_low ~ prop,
+    prior = c(prior(normal(0, 10), class = b),
+              prior(uniform(0, 10), class = sigma)),
+    iter = 2000, warmup = 500, chains = 4, cores = 4)
+
+mh <- brm(data = mod_dat_h, family = gaussian, 
+          mean_low ~ 1 + prop,
+          prior = c(prior(normal(0, 10), class = b),
+                    prior(uniform(0, 10), class = sigma)),
+          iter = 2000, warmup = 500, chains = 4, cores = 4)
+
+tibble(
+  x = seq(-2, 2, by = .0001),
+  Posterior_1 = dnorm(x, fixef(mw)[2,1], fixef(mw)[2,2]), 
+  Posterior_2 = dnorm(x, fixef(mh)[2,1], fixef(mh)[2,2])) %>%
+  ggplot() +
+  geom_density(aes(x = x, y = Posterior_1), stat = 'identity', color = '#2ca25f', fill = '#2ca25f', alpha = .5) +
+  geom_density(aes(x = x, y = Posterior_2), stat = 'identity', color = '#ffab84', fill = '#ffab84', alpha = .5) +
+  geom_hline(yintercept = 0) +
+  theme_bw()
+
 
 h_mod <- lm(mean_low ~ prop, data = mod_dat_h)
 w_mod <- lm(mean_low ~ prop, data = mod_dat_w)
