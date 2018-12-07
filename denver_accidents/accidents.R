@@ -208,6 +208,17 @@ mod_dat <- hud_props %>%
   mutate(prop = val/POPULATION_2010) %>%
   filter(race_ethnicity != 'BLACK_2010')
 
+# map of ethnicity and race
+mod_dat %>% left_join(nhoods) %>%
+  ggplot() + 
+  geom_sf(aes(fill = race_ethnicity, alpha = prop), size = .1) +
+  geom_sf(data = filter(roads, RTTYP == "I"), color = "#dde023", size = .9, alpha = .8) +
+  geom_sf(data = filter(roads, RTTYP == "U"), color = "#c6c924", size = .5, alpha = .8) +
+  map_theme_soft() +
+  scale_fill_manual(values = c('#ffab84', '#2ca25f')) +
+  ggtitle(label = "Majority Race/Ethnicity Neighborhoods") +
+  theme(legend.position="none",
+        text=element_text(family="Montserrat"))
 
 
 mw <- brm(data = mod_dat_w, family = gaussian, 
@@ -222,22 +233,35 @@ mh <- brm(data = mod_dat_h, family = gaussian,
                     prior(uniform(0, 10), class = sigma)),
           iter = 2000, warmup = 500, chains = 4, cores = 4)
 
-tibble(
-  x = seq(-2, 2, by = .0001),
+# density plot of posterior distributions
+dens_plot <- tibble(
+  x = seq(-1, 1, by = .0001),
   Posterior_1 = dnorm(x, fixef(mw)[2,1], fixef(mw)[2,2]), 
   Posterior_2 = dnorm(x, fixef(mh)[2,1], fixef(mh)[2,2])) %>%
   ggplot() +
   geom_density(aes(x = x, y = Posterior_1), stat = 'identity', color = '#2ca25f', fill = '#2ca25f', alpha = .5) +
-  geom_density(aes(x = x, y = Posterior_2), stat = 'identity', color = '#ffab84', fill = '#ffab84', alpha = .5) +
-  geom_hline(yintercept = 0) +
+  geom_density(aes(x = x, y = Posterior_2), stat = 'identity', color = '#ffab84', fill = '#ffab84', alpha = .5) + +
   theme_bw() +
   labs(x = "Posterior Slope Probabilities", y = "Density") +
   theme(text=element_text(family="Montserrat"))
+
+dens_build <- ggplot_build(dens_plot)$data
+
+dens_plot +
+  geom_area(data = subset(dens_build[[2]], x <= (fixef(mh)[2,1] + (2 * fixef(mh)[2,2])) & 
+                            x >= (fixef(mh)[2,1] - (2 * fixef(mh)[2,2]))), aes(x = x, y = y), alpha = .5, fill = '#ffab84', 
+            color = '#ffab84') +
+  geom_area(data = subset(dens_build[[1]], x <= (fixef(mw)[2,1] + (2 * fixef(mw)[2,2])) & 
+                            x >= (fixef(mw)[2,1] - (2 * fixef(mw)[2,2]))), aes(x = x, y = y), alpha = .5, fill = '#2ca25f',
+            color = '#2ca25f') +
+  geom_hline(yintercept = 0) +
+  ggtitle(label = "Posterior Slope Probabilities") +
+  theme(axis.title.x = element_blank())
   
 
 
-h_mod <- lm(mean_low ~ prop, data = mod_dat_h)
-w_mod <- lm(mean_low ~ prop, data = mod_dat_w)
+#h_mod <- lm(mean_low ~ prop, data = mod_dat_h)
+#w_mod <- lm(mean_low ~ prop, data = mod_dat_w)
 
 # visualize the relationship between low-income housing and proportion of a race
 hud_props %>%
@@ -246,7 +270,11 @@ hud_props %>%
   mutate(prop = val/POPULATION_2010) %>%
   ggplot(aes(x = prop, y = mean_low, color = race_ethnicity)) + 
   geom_point() + 
-  geom_abline(intercept = coef(h_mod)[1], slope = coef(h_mod)[2], color = '#2ca25f') + 
-  geom_abline(intercept = coef(w_mod)[1], slope = coef(w_mod)[2], color = '#ffab84') + 
+  geom_abline(intercept = fixef(mh)[1,1], slope = fixef(mh)[2,1], color = '#ffab84') + 
+  geom_abline(intercept = fixef(mw)[1,1], slope = fixef(mw)[2,1], color = '#2ca25f') + 
+  geom_abline(intercept = fixef(mw)[1,1], slope = fixef(mw)[2,1], color = '#2ca25f') + 
   theme_bw() +
-  scale_color_manual(values = c('#c6c924', '#2ca25f', "#ffab84")) 
+  scale_color_manual(values = c('#c6c924',"#ffab84" ,'#2ca25f' )) +
+  labs(x = "Race/Ethnicity Population Proportion", y = "Neighborhood Mean Low Income") +
+  theme(text=element_text(family="Montserrat")) +
+  theme(legend.position="none")
