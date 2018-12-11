@@ -250,11 +250,13 @@ dens_plot <- tibble(
 dens_build <- ggplot_build(dens_plot)$data
 
 dens_plot +
-  geom_area(data = subset(dens_build[[2]], x <= (fixef(mh)[2,1] + (2 * fixef(mh)[2,2])) & 
+  geom_area(data = subset(dens_build[[2]], x <= (fixef(mh)[2,1] + 
+                                                   (2 * fixef(mh)[2,2])) & 
                             x >= (fixef(mh)[2,1] - (2 * fixef(mh)[2,2]))), 
             aes(x = x, y = y), alpha = .5, fill = '#ffab84', 
             color = '#ffab84') +
-  geom_area(data = subset(dens_build[[1]], x <= (fixef(mw)[2,1] + (2 * fixef(mw)[2,2])) & 
+  geom_area(data = subset(dens_build[[1]], x <= (fixef(mw)[2,1] + 
+                                                   (2 * fixef(mw)[2,2])) & 
                             x >= (fixef(mw)[2,1] - (2 * fixef(mw)[2,2]))), 
             aes(x = x, y = y), alpha = .5, fill = '#2ca25f',
             color = '#2ca25f') +
